@@ -6,7 +6,7 @@ import Link from "next/link"
 
 export default function ChatComponent() {
     return (
-            <div className="flex flex-1">
+            <div className="mt-16 flex flex-1">
                 <div className="hidden w-64 border-r bg-muted/40 p-4 sm:block">
                     <div className="mb-4 flex items-center gap-2">
                         <SearchIcon className="h-4 w-4 text-muted-foreground"/>
@@ -207,7 +207,7 @@ export default function ChatComponent() {
                             </div>
                         </div>
                     </div>
-                    <div className="border-t p-4">
+                    <div className="border-t p-4  bottom-0 bg-secondary">
                         <form className="flex items-center gap-2">
                             <Input type="text" placeholder="Type your message..." className="flex-1"/>
                             <Button type="submit">
