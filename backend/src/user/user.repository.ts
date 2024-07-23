@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './schema/user-schema';
-import { GenericRepository } from '../shared/generic-repository';
+import { UserSchema } from './schema/user-schema';
+import { GenericMongoRepository } from '../shared/generic-mongo-repository.service';
 
 @Injectable()
-export class UserRepository extends GenericRepository<User> {}
+export class UserRepository extends GenericMongoRepository<typeof UserSchema> {}

@@ -1,5 +1,4 @@
-import { GenericRepository } from './generic-repository';
-import { Injectable } from '@nestjs/common';
+import { Model } from 'mongoose';
 
 export interface IGenericService<T> {
   findAll(criteria?: any): Promise<T[]>;
@@ -13,9 +12,8 @@ export interface IGenericService<T> {
   delete(id: string, criteria?: any): Promise<void>;
 }
 
-@Injectable()
 export class GenericService<T> implements IGenericService<T> {
-  constructor() {}
+  constructor(protected readonly model: Model<T>) {}
 
   findAll(criteria?: any): Promise<T[]> {
     throw new Error('Method not implemented.');
@@ -34,8 +32,7 @@ export class GenericService<T> implements IGenericService<T> {
   }
 
   async create(entity: T): Promise<T> {
-    // await this.repository.create(entity);
     console.log('Calling create ', entity);
-    return Promise.resolve(<T>1);
+    return await this.model.create(entity);
   }
 }

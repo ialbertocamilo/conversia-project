@@ -6,11 +6,10 @@ import { jwtConstants } from '../common/constants';
 import { UserModule } from '../user/user.module';
 import { SharedModule } from '../shared/shared.module';
 import { UserService } from '../user/user.service';
-import { GenericService } from '../shared/generic-service';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, UserService, GenericService],
+  providers: [AuthService],
   imports: [
     UserModule,
     SharedModule,

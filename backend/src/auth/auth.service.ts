@@ -4,22 +4,19 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject() private usersService: UserService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private jwtService: JwtService) {}
 
-  async signIn(
-    username: string,
-    pass: string,
-  ): Promise<{ access_token: string }> {
-    const user = await this.usersService.findOne(username);
-    if (user) {
-      throw new UnauthorizedException();
-    }
-    const payload = { sub: user, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
-  }
+  // async signIn(
+  //   username: string,
+  //   pass: string,
+  // ): Promise<{ access_token: string }> {
+  //   const user = await this.usersService.findOne(username);
+  //   if (user) {
+  //     throw new UnauthorizedException();
+  //   }
+  //   const payload = { sub: user, username: user.username };
+  //   return {
+  //     access_token: await this.jwtService.signAsync(payload),
+  //   };
+  // }
 }

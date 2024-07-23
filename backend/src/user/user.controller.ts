@@ -1,11 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { GenericService } from '../shared/generic-service';
+import { IGenericService } from '../shared/generic-service';
 import { User } from './schema/user-schema';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: GenericService<User>) {}
+  constructor(
+    @Inject(UserService) private readonly userService: IGenericService<User>,
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {

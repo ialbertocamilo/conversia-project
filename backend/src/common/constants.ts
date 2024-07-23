@@ -7,3 +7,8 @@ export const SALT = 8;
 export const jwtConstants = {
   secret: 'secretKey',
 };
+
+export const providerNames = {
+  genericService: Symbol.for('genericService'),
+  genericRepository: Symbol.for('genericRepository'),
+};

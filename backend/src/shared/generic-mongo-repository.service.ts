@@ -1,20 +1,19 @@
-import { Model } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 
 export interface IGenericRepository<T> {
   findAll(criteria?: any): Promise<T[]>;
-
   create(entity: T): Promise<T>;
-
-  update(id: string, entity: Partial<T>, criteria?: any): Promise<T>;
-
-  findOne(id: string, criteria?: any): Promise<T>;
-
+  update(id: string, entity: Partial<T>, criteria?: any): Promise<T | null>;
+  findOne(id: string, criteria?: any): Promise<T | null>;
   delete(id: string, criteria?: any): Promise<void>;
 }
 
 @Injectable()
-export class GenericRepository<T> implements IGenericRepository<T> {
+export class GenericMongoRepository<T extends object>
+  implements IGenericRepository<T>
+{
   constructor(private readonly model: Model<T>) {}
 
   findAll(criteria?: any): Promise<T[]> {
@@ -26,25 +25,22 @@ export class GenericRepository<T> implements IGenericRepository<T> {
   }
 
   update(id: string, entity: Partial<T>, criteria?: any): Promise<T | null> {
-    if (criteria) {
-      return this.model.findOneAndUpdate({ _id: id, ...criteria }, entity, {
-        new: true,
-      });
-    }
-    return this.model.findByIdAndUpdate(id, entity, { new: true });
+    return this.model.findOneAndUpdate({ _id: id, ...criteria }, entity, {
+      new: true,
+    });
   }
 
-  async findOne(id: string, criteria?: any): Promise<T | null> {
+  findOne(id: string, criteria?: any): Promise<T | null> {
     if (criteria) {
       return this.model.findOne({ _id: id, ...criteria });
     }
     return this.model.findById(id);
   }
 
-  async delete(id: string, criteria?: any): Promise<void> {
+  delete(id: string, criteria?: any): Promise<void> {
     if (criteria) {
-      await this.model.findOneAndDelete({ _id: id, ...criteria });
+      return this.model.findOneAndDelete({ _id: id, ...criteria });
     }
-    await this.model.findByIdAndDelete(id);
+    return this.model.findByIdAndDelete(id);
   }
 }
