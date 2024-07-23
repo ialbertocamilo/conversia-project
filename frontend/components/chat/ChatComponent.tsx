@@ -1,224 +1,111 @@
+import React from "react";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Button} from "@/components/ui/button";
+import {Textarea} from "@/components/ui/textarea";
 
-import {Button} from "@/components/ui/button"
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
-import {Input} from "@/components/ui/input"
-import Link from "next/link"
+const MESSAGE_STATUSES = {
+    SENDER: "sender",
+    RECEIVER: "receiver",
+};
 
-export default function ChatComponent() {
-    return (
-            <div className="mt-16 flex flex-1">
-                <div className="hidden w-64 border-r bg-muted/40 p-4 sm:block">
-                    <div className="mb-4 flex items-center gap-2">
-                        <SearchIcon className="h-4 w-4 text-muted-foreground"/>
-                        <Input type="search" placeholder="Search users..."
-                               className="w-full bg-background shadow-none"/>
-                    </div>
-                    <div className="grid gap-2">
-                        <Link href="#" className="flex items-center gap-3 rounded-md p-2 hover:bg-muted"
-                              prefetch={false}>
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarImage src="/placeholder-user.jpg"/>
-                                <AvatarFallback>AC</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-0.5">
-                                <p className="text-sm font-medium leading-none">Acme Co.</p>
-                                <div className="flex items-center gap-1">
-                                    <div className="h-2 w-2 rounded-full bg-green-500"/>
-                                    <p className="text-xs text-muted-foreground">Online</p>
-                                </div>
-                            </div>
-                        </Link>
-                        <Link href="#" className="flex items-center gap-3 rounded-md p-2 hover:bg-muted"
-                              prefetch={false}>
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarImage src="/placeholder-user.jpg"/>
-                                <AvatarFallback>JD</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-0.5">
-                                <p className="text-sm font-medium leading-none">Jill Davis</p>
-                                <div className="flex items-center gap-1">
-                                    <div className="h-2 w-2 rounded-full bg-green-500"/>
-                                    <p className="text-xs text-muted-foreground">Online</p>
-                                </div>
-                            </div>
-                        </Link>
-                        <Link href="#" className="flex items-center gap-3 rounded-md p-2 hover:bg-muted"
-                              prefetch={false}>
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarImage src="/placeholder-user.jpg"/>
-                                <AvatarFallback>KS</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-0.5">
-                                <p className="text-sm font-medium leading-none">Kara Smith</p>
-                                <div className="flex items-center gap-1">
-                                    <div className="h-2 w-2 rounded-full bg-green-500"/>
-                                    <p className="text-xs text-muted-foreground">Online</p>
-                                </div>
-                            </div>
-                        </Link>
-                        <Link href="#" className="flex items-center gap-3 rounded-md p-2 hover:bg-muted"
-                              prefetch={false}>
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarImage src="/placeholder-user.jpg"/>
-                                <AvatarFallback>MJ</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-0.5">
-                                <p className="text-sm font-medium leading-none">Mia Jenson</p>
-                                <div className="flex items-center gap-1">
-                                    <div className="h-2 w-2 rounded-full bg-green-500"/>
-                                    <p className="text-xs text-muted-foreground">Online</p>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
+const ChatMessage = ({message, status}) => (
+    <div
+        className={`flex items-start gap-3 ${
+            status === MESSAGE_STATUSES.SENDER ? "justify-end" : ""
+        }`}
+    >
+        {status === MESSAGE_STATUSES.RECEIVER && (
+            <Avatar className="w-8 h-8 border">
+                <AvatarImage src="/placeholder-user.jpg"/>
+                <AvatarFallback>AC</AvatarFallback>
+            </Avatar>
+        )}
+        <div className="grid gap-1  rounded-lg bg-muted p-4 text-sm">
+            <div
+                className={` bg-<span class="math-inline">\{
+status \=\=\= MESSAGE\_STATUSES\.SENDER ? "primary" \: "muted"
+\} rounded\-lg p\-3 max\-w\-\[75%\] text\-</span>{
+          status === MESSAGE_STATUSES.SENDER ? "primary-foreground" : "muted-foreground"
+        }`}
+            >
+                <div className="flex items-center gap-2 text-sm ">
+                    <span className="font-medium ">{message.sender}</span>
+                    <span
+                        className={`text-${status === MESSAGE_STATUSES.SENDER ? "primary-foreground " : "muted-foreground/80"}`}>
+            {message.time}
+          </span>
                 </div>
-                <div className="flex flex-1 flex-col">
-                    <div className="flex-1 overflow-auto p-4">
-                        <div className="grid gap-4">
-                            <div className="flex items-start gap-4">
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>AC</AvatarFallback>
-                                </Avatar>
-                                <div className="grid gap-1 rounded-lg bg-muted p-4 text-sm">
-                                    <p>Hey everyone! How's it going?</p>
-                                    <div className="text-xs text-muted-foreground">Acme Co. • 2:30 PM</div>
+                <p className="text-sm ">{message.text}</p>
+            </div>
+        </div>
+        {status === MESSAGE_STATUSES.SENDER && (
+            <Avatar className="w-8 h-8 border">
+                <AvatarImage src="/placeholder-user.jpg"/>
+                <AvatarFallback>YO</AvatarFallback>
+            </Avatar>
+        )}
+    </div>
+);
+export default function ChatComponent() {
+    const messages = [
+        // Your message data here
+        {sender: "Alex", time: "3:45 PM", text: "Hey, how's it going?"},
+    ];
+
+    return (
+        <>
+            <div className="flex-1 mt-20 overflow-auto">
+
+                <div className="grid gap-4 ">
+                    <div className="flex items-start gap-3">
+                        <Avatar className="w-8 h-8 border">
+                            <AvatarImage src="/placeholder-user.jpg"/>
+                            <AvatarFallback>AC</AvatarFallback>
+                        </Avatar>
+                        <div className="grid gap-1">
+                            <div className="bg-muted rounded-lg p-3 max-w-[75%]">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span className="font-medium">Alex</span>
+                                    <span className="text-muted-foreground">3:45 PM</span>
                                 </div>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Doing great, thanks for asking!</p>
-                                    <div className="text-xs text-primary-foreground/70">Jill Davis • 2:32 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>JD</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4">
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>KS</AvatarFallback>
-                                </Avatar>
-                                <div className="grid gap-1 rounded-lg bg-muted p-4 text-sm">
-                                    <p>Awesome, I'm excited for the new product launch!</p>
-                                    <div className="text-xs text-muted-foreground">Kara Smith • 2:35 PM</div>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div className="flex items-start gap-4 justify-end">
-                                <div className="grid gap-1 rounded-lg bg-primary p-4 text-sm text-primary-foreground">
-                                    <p>Me too, it's going to be huge!</p>
-                                    <div className="text-xs text-primary-foreground/70">Mia Jenson • 2:37 PM</div>
-                                </div>
-                                <Avatar className="h-10 w-10 border">
-                                    <AvatarImage src="/placeholder-user.jpg"/>
-                                    <AvatarFallback>MJ</AvatarFallback>
-                                </Avatar>
+                                <p className="text-sm">Hey, how's it going?</p>
                             </div>
                         </div>
                     </div>
-                    <div className="border-t p-4  bottom-0 bg-secondary">
-                        <form className="flex items-center gap-2">
-                            <Input type="text" placeholder="Type your message..." className="flex-1"/>
-                            <Button type="submit">
-                                <SendIcon className="h-4 w-4"/>
-                                <span className="sr-only">Send</span>
-                            </Button>
-                        </form>
+                </div>
+                <div className="flex items-start gap-3 justify-end">
+                    <div className="grid gap-1">
+                        <div className="bg-primary rounded-lg p-3 max-w-[75%] text-primary-foreground">
+                            <div className="flex items-center gap-2 text-sm">
+                                <span className="font-medium">You</span>
+                                <span className="text-primary-foreground/80">3:46 PM</span>
+                            </div>
+                            <p className="text-sm">I'm doing great, thanks for asking!</p>
+                        </div>
                     </div>
+                    <Avatar className="w-8 h-8 border">
+                        <AvatarImage src="/placeholder-user.jpg"/>
+                        <AvatarFallback>Yo</AvatarFallback>
+                    </Avatar>
                 </div>
             </div>
-    )
+            <div className="bg-card p-4 shadow">
+                <div className="relative">
+                    <Textarea
+                        placeholder="Type your message..."
+                        name="message"
+                        id="message"
+                        rows={1}
+                        className="min-h-[48px] rounded-2xl resize-none p-4 border border-neutral-400 shadow-sm pr-16"
+                    />
+                    <Button type="submit" size="icon" className="absolute w-8 h-8 top-3 right-3 disabled">
+                        <SendIcon className="w-4 h-4"/>
+                        <span className="sr-only">Send</span>
+                    </Button>
+                </div>
+            </div>
+        </>
+    );
 }
 
 function SearchIcon(props) {
@@ -258,50 +145,6 @@ function SendIcon(props) {
         >
             <path d="m22 2-7 20-4-9-9-4Z"/>
             <path d="M22 2 11 13"/>
-        </svg>
-    )
-}
-
-
-function WebcamIcon(props) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="10" r="8"/>
-            <circle cx="12" cy="10" r="3"/>
-            <path d="M7 22h10"/>
-            <path d="M12 22v-4"/>
-        </svg>
-    )
-}
-
-
-function XIcon(props) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M18 6 6 18"/>
-            <path d="m6 6 12 12"/>
         </svg>
     )
 }

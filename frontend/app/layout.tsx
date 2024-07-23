@@ -22,9 +22,8 @@ export default function RootLayout({
             inter.className)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <NavBar/>
-            <div className="h-25">
-            {children}
-
+            <div className="container flex flex-col h-screen bg-background ">
+                {children}
             </div>
         </ThemeProvider>
         </body>
