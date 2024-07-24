@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import { IGenericRepository } from './generic-mongo-repository.service';
 
 export interface IGenericService<T> {
   findAll(criteria?: any): Promise<T[]>;
@@ -13,7 +14,7 @@ export interface IGenericService<T> {
 }
 
 export class GenericService<T> implements IGenericService<T> {
-  constructor(protected readonly model: Model<T>) {}
+  constructor(protected readonly repository: IGenericRepository<T>) {}
 
   findAll(criteria?: any): Promise<T[]> {
     throw new Error('Method not implemented.');
@@ -33,6 +34,6 @@ export class GenericService<T> implements IGenericService<T> {
 
   async create(entity: T): Promise<T> {
     console.log('Calling create ', entity);
-    return await this.model.create(entity);
+    return await this.repository.create(entity);
   }
 }

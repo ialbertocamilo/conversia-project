@@ -7,7 +7,7 @@ import { Model } from 'mongoose';
 
 @Module({
   controllers: [],
-  providers: [], // Add GenericMongoRepository to providers
+  providers: [],
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],

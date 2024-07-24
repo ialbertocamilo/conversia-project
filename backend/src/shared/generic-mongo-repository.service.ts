@@ -1,20 +1,21 @@
-import { Document, Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 export interface IGenericRepository<T> {
   findAll(criteria?: any): Promise<T[]>;
+
   create(entity: T): Promise<T>;
+
   update(id: string, entity: Partial<T>, criteria?: any): Promise<T | null>;
+
   findOne(id: string, criteria?: any): Promise<T | null>;
+
   delete(id: string, criteria?: any): Promise<void>;
 }
 
-@Injectable()
 export class GenericMongoRepository<T extends object>
   implements IGenericRepository<T>
 {
-  constructor(private readonly model: Model<T>) {}
+  constructor(protected readonly model: Model<T>) {}
 
   findAll(criteria?: any): Promise<T[]> {
     return this.model.find(criteria);

@@ -5,10 +5,11 @@ import { SharedModule } from '../shared/shared.module';
 import { GenericService } from '../shared/generic-service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schema/user-schema';
+import { UserMongoRepository } from './user-mongo.repository';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService, GenericService],
+  providers: [UserService, GenericService, UserMongoRepository],
   imports: [
     SharedModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
