@@ -7,7 +7,7 @@ export interface IGenericRepository<T> {
 
   update(id: string, entity: Partial<T>, criteria?: any): Promise<T | null>;
 
-  findOne(id: string, criteria?: any): Promise<T | null>;
+  findOne(id: string|null, criteria?: any): Promise<T | null>;
 
   delete(id: string, criteria?: any): Promise<void>;
 }
@@ -31,9 +31,9 @@ export class GenericMongoRepository<T extends object>
     });
   }
 
-  findOne(id: string, criteria?: any): Promise<T | null> {
+  findOne(id: string|null, criteria?: any): Promise<T | null> {
     if (criteria) {
-      return this.model.findOne({ _id: id, ...criteria });
+      return this.model.findOne({  ...criteria });
     }
     return this.model.findById(id);
   }

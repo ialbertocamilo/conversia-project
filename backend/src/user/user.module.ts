@@ -14,5 +14,6 @@ import { UserMongoRepository } from './user-mongo.repository';
     SharedModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
+  exports:[UserService,GenericService,UserMongoRepository]
 })
 export class UserModule {}
