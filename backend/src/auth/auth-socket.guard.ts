@@ -1,12 +1,15 @@
-import {CanActivate, ExecutionContext, Injectable, UnauthorizedException,} from '@nestjs/common';
+import {CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException,} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {Request} from 'express';
 import {jwtConstants} from "../common/constants";
 import {Socket} from "socket.io";
+import {UserService} from "../user/user.service";
+import {IGenericService} from "../shared/generic-service";
+import {User} from "../user/schema/user-schema";
 
 @Injectable()
 export class AuthSocketGuard implements CanActivate {
-    constructor(private jwtService: JwtService) {
+    constructor(private jwtService: JwtService,@Inject(UserService) private readonly userService: IGenericService<User>) {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -22,7 +25,9 @@ export class AuthSocketGuard implements CanActivate {
                     secret: jwtConstants.secret,
                 }
             );
-            request.handshake.headers['user'] = result
+            const user = await this.userService.findOne(result.sub, null, '-password')
+            if (user)
+            request.handshake.headers['user'] = JSON.stringify(user)
         } catch {
             console.log("Exception")
             throw new UnauthorizedException();

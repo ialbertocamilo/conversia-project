@@ -9,11 +9,10 @@ export interface IRegister {
 export async function register(data: IRegister) {
     try {
         const response = await api().post('/auth', data)
-        if (response.status === 200) {
+        if (response.status === 201) {
             return response.data;
         }
-        throw new Error('Failed to save register');
-
+        return
     } catch (error) {
         console.error('Error :', error);
         throw error;

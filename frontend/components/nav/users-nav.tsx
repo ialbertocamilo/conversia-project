@@ -1,24 +1,35 @@
+'use client'
 import {Button} from "@/components/ui/button";
 import {PlusIcon} from "@radix-ui/react-icons";
 import {SearchIcon} from "lucide-react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {useEffect, useState} from "react";
-import {getAll} from "@/api/users/get-all";
-import {IUser} from "@/interfaces/users";
+import {IOnlineUser, User} from "@/interfaces/online-users.interface";
+import {useRecoilState} from "recoil";
+import {userRoomAtom} from "@/atoms/user-room.atom";
+import {useSocket} from "@/hooks/useSocket";
 
 
-function Item({name, message, time}: { name: string, message: string, time: Date }) {
+function Item({name, message, select,}: {
+    name?: string,
+    message?: string,
+    time: Date,
+    select: Function
+}) {
+
+    const selectItem = () => {
+        select()
+    }
     return (
         <>
-            <div className="flex items-start gap-4 m-2 cursor-pointer hover:animate-pulse hover:scale-105">
-                <Avatar className="w-8 h-8">
+            <div className="flex items-start items-center gap-4 m-2 cursor-pointer hover:animate-pulse hover:scale-105"
+                 onClick={selectItem}>
+                <Avatar className="w-8 h-8 border-green-500 border-2">
                     <AvatarImage src="/placeholder-user.jpg"/>
-                    <AvatarFallback>{name.substring(0,2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{name?.substring(0, 2)?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1 text-sm">
-                    <div className="flex items-center gap-2">
+                    <div className=" items-center gap-2">
                         <div className="font-medium">{name}</div>
-                        <div className="text-xs text-muted-foreground">{time.toLocaleTimeString()}</div>
                     </div>
                     <div>
                         <p className='line-clamp-2'>{message}
@@ -31,15 +42,15 @@ function Item({name, message, time}: { name: string, message: string, time: Date
     )
 }
 
-export function UsersNav() {
+export function UsersNav({items}: { items: IOnlineUser[] | undefined }) {
 
-    const [items, setItems] = useState<IUser[]>()
-    useEffect(() => {
-        getAll().then(data => {
-            console.log(data)
-            setItems(data)
-        })
-    }, []);
+    const [user, setUser] = useRecoilState(userRoomAtom)
+
+    const {emitEnterRoom} = useSocket()
+    const selectUser = (user: User) => {
+        setUser(user)
+        emitEnterRoom(user)
+    }
     return (
         <div
             className="hidden lg:block fixed z-20 inset-0 top-[3.8125rem] left-[max(0px,calc(50%-45rem))] right-auto w-[19rem] pb-10 pl-8 overflow-y-auto">
@@ -55,15 +66,23 @@ export function UsersNav() {
                         </div>
                     </div>
                     <hr/>
-                    <div className="flex justify-center relative pointer-events-auto m-3">
+                    <div className=" w-full  relative pointer-events-auto my-1">
                         <Button size="sm"
-                                className='bg-background text-primary hover:bg-background hover:text-primary-foreground'><SearchIcon/>Quick
+                                className='bg-background  w-full  text-primary hover:bg-background hover:text-primary-foreground'><SearchIcon/>Quick
                             search...<span
                                 className="ml-auto pl-3 flex-none text-xs font-semibold">Ctrl K</span></Button>
                     </div>
+                    <div className=" w-full  relative pointer-events-auto my-1">
+
+                        <Button size="sm"
+                                className=' bg-background w-full text-primary hover:bg-background hover:text-primary-foreground'>Sala
+                            principal</Button>
+                    </div>
                 </div>
                 <ul>
-                    {items?.map(value => <Item key={value._id} name={value.name} message={''} time={new Date()}/>)}
+                    {items?.map(value => <Item key={value?.user?._id} name={value?.user?.name} message={''}
+                                               select={() => selectUser(value?.user as User)}
+                                               time={new Date()}/>)}
                 </ul>
             </nav>
         </div>)

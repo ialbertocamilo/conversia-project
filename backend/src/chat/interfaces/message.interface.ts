@@ -1,17 +1,15 @@
 
+
 export enum MessengerType {
     SENDER,
     RECEIVER,
 };
 export interface IMessage {
-    userId?: string;
+    userId: string;
     receiverId:string;
     message: string;
-    createdAt: Date;
+    time: Date;
     type?: MessengerType
 }
 
-export interface IChatMessage{
-    senderMessage:IMessage[],
-    receiverMessage:IMessage[]
-}
+

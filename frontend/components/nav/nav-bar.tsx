@@ -1,76 +1,92 @@
 "use client"
 import Link from "next/link"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
+import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet"
+import {Button} from "@/components/ui/button"
 import {ModeToggle} from "@/components/buttons/button-theme-toggle";
+import {useRecoilState} from "recoil";
+import {authUserAtom} from "@/atoms/auth-user.atom";
+import {useEffect} from "react";
+import {getMe} from "@/api/auth/get-me";
+import {useSocket} from "@/hooks/useSocket";
+import {useStorage} from "@/hooks/useStorage";
+import {STORAGE_VARIABLES} from "@/shared/constants";
+import {useRouter} from "next/navigation";
 
 export default function NavBar() {
-  return (
-    <header className="fixed top-0 z-50 w-full bg-background h-25">
-      <div className="container flex h-16 items-center justify-between ">
-        <Link href="/" className="flex items-center gap-2" prefetch={false}>
-          <span className="text-lg font-semibold accent-muted">Conversia Chat App</span>
-        </Link>
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" prefetch={false}>
-            Home
-          </Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" prefetch={false}>
-            Contact
-          </Link>
-        <ModeToggle/>
-        </nav>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="md:hidden">
-              <MenuIcon className="h-6 w-6" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="md:hidden">
-            <div className="grid gap-6 p-6">
-              <Link href="#" className="text-lg font-medium hover:text-primary transition-colors" prefetch={false}>
-                Home
-              </Link>
-              <Link href="#" className="text-lg font-medium hover:text-primary transition-colors" prefetch={false}>
-                Features
-              </Link>
-              <Link href="#" className="text-lg font-medium hover:text-primary transition-colors" prefetch={false}>
-                Pricing
-              </Link>
-              <Link href="#" className="text-lg font-medium hover:text-primary transition-colors" prefetch={false}>
-                About
-              </Link>
-              <Link href="#" className="text-lg font-medium hover:text-primary transition-colors" prefetch={false}>
-                Contact
-              </Link>
+
+    const [authUser, setAuthUser] = useRecoilState(authUserAtom)
+    const {emitClose} = useSocket()
+    useEffect(() => {
+        getMe().then(data => {
+            setAuthUser(data)
+        })
+    }, []);
+    const router=useRouter()
+
+    const closeSession = () => {
+        setAuthUser({})
+        useStorage(STORAGE_VARIABLES.token).set(null)
+        emitClose()
+        router.push('/')
+    }
+    return (
+        <header className="fixed top-0 z-50 w-full bg-background h-25">
+            <div className="container flex h-16 items-center justify-between ">
+                <Link href="/" className="flex items-center gap-2" prefetch={false}>
+                    <span className="text-lg font-semibold accent-muted">Conversia Chat App</span>
+                </Link>
+                <nav className="hidden items-center gap-6 md:flex">
+                    <span
+                        className='text-sm font-medium hover:text-primary transition-colors'>{authUser.name?'Hello, '+authUser.name:''}</span>
+                    <Link href="#" className="text-sm font-medium hover:text-primary transition-colors"
+                          prefetch={false}
+                          onClick={closeSession}
+                    >
+                        Cerrar sesión
+                    </Link>
+                    <ModeToggle/>
+                </nav>
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="outline" size="icon" className="md:hidden">
+                            <MenuIcon className="h-6 w-6"/>
+                            <span className="sr-only">Toggle navigation menu</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="md:hidden">
+                        <div className="grid gap-6 p-6">
+                            <Link href="#" className="text-lg font-medium hover:text-primary transition-colors"
+                                  prefetch={false}>
+                                Cerrar sesión
+                            </Link>
+
+                        </div>
+                    </SheetContent>
+                </Sheet>
             </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </header>
-  )
+        </header>
+    )
 }
 
-function MenuIcon(props:any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
-  )
+function MenuIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <line x1="4" x2="20" y1="12" y2="12"/>
+            <line x1="4" x2="20" y1="6" y2="6"/>
+            <line x1="4" x2="20" y1="18" y2="18"/>
+        </svg>
+    )
 }
 
 

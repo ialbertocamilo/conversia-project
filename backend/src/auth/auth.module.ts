@@ -21,6 +21,7 @@ import {User, UserSchema} from "../user/schema/user-schema";
             signOptions: {expiresIn: '60m'},
         }),
     ],
+    exports:[AuthService]
 })
 export class AuthModule {
 }

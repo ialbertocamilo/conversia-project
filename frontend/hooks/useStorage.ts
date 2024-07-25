@@ -25,11 +25,8 @@ export function useStorage<T>(storageKey: string) {
             return JSON.parse(data)
         return null
     }
-    const set = (data: any) => {
-        console.log(key)
-        if (data)
-            localStorage.setItem(key, JSON.stringify(data));
-        return null
+    const set = (data: any | null) => {
+        localStorage.setItem(key, JSON.stringify(data));
     }
 
     return {get, set};

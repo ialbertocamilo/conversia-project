@@ -9,43 +9,52 @@ import {
 
 import {Server, Socket} from 'socket.io';
 import {ChatService} from './chat.service';
-import {Inject, OnModuleInit, UseGuards} from '@nestjs/common';
+import {Inject, Logger, OnModuleInit, UseGuards} from '@nestjs/common';
 import {AuthSocketGuard} from "../auth/auth-socket.guard";
-import {IUserToken} from "../shared/interfaces/user-token.interface";
 import {UserService} from "../user/user.service";
 import {IGenericService} from "../shared/generic-service";
 import {User} from "../user/schema/user-schema";
+import {AuthService} from "../auth/auth.service";
+import {CACHE_MANAGER} from "@nestjs/cache-manager";
+import {RedisCache} from "cache-manager-redis-yet";
+import {socketEvents} from "../common/constants";
+import {getUsersExceptMe} from "../common/utils";
 
-enum MessengerType {
-    SENDER,
-    RECEIVER,
-};
-
-interface IMessage {
-    author: string;
-    message: string;
-    time: Date;
-    type?: MessengerType
-}
 
 @WebSocketGateway({cors: {origin: '*'}})
 export class ChatGateway implements OnModuleInit, OnGatewayConnection {
     @WebSocketServer()
     server: Server;
-
+    private readonly logger = new Logger()
     private connectedUsers: { [userId: string]: Socket } = {};
 
-    constructor(private readonly chatService: ChatService, @Inject(UserService) private readonly userService: IGenericService<User>) {
+    constructor(private readonly chatService: ChatService,
+                @Inject(UserService) private readonly userService: IGenericService<User>,
+                @Inject(AuthService) private readonly authService: AuthService,
+                @Inject(CACHE_MANAGER) private cacheManager: RedisCache
+    ) {
     }
 
-    handleConnection(client: Socket, ...args: any[]) {
-        console.log(`Client : \x1b[31m ${client.id} \x1b[0m connected.`);
+    async handleConnection(client: Socket) {
         this.connectedUsers[client.id] = client;
-        console.log(`Clients `, Object.keys(this.connectedUsers))
+        const token = client.handshake.headers.authorization
+        const user = await this.authService.wsAuth(token)
+        if (!user) {
+            client.disconnect(true);
+            return;
+        }
+        const onlineUsers = await this.chatService.addOnlineUser(user, client.id)
+        client.emit(socketEvents.usersList, getUsersExceptMe(user, onlineUsers))
+        this.logger.log(`Client Socket list: `)
+        console.log(Object.keys(this.connectedUsers))
+        this.logger.log(`Client : \x1b[31m ${client.id} \x1b[0m connected.`);
     }
 
-    handleDisconnect(client: Socket) {
-        console.log(`Client : \x1b[31m ${client.id} \x1b[0m disconnected.`);
+    async handleDisconnect(client: Socket) {
+        this.logger.log(`Client : \x1b[31m ${client.id} \x1b[0m disconnected.`);
+        const onlineUsers = await this.chatService.removeSocketFromOnlineList(client.id)
+        this.server.emit(socketEvents.usersList, onlineUsers)
+        client.disconnect()
         delete this.connectedUsers[client.id];
     }
 
@@ -53,29 +62,43 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
         console.log('Websocket initialized, url', process.env.FRONTEND_URL);
     }
 
-    @SubscribeMessage('message')
+    @SubscribeMessage(socketEvents.message)
     @UseGuards(AuthSocketGuard)
     async onMessage(
         @MessageBody() message: IMessage,
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() client: Socket
     ) {
-        const user = client.handshake.headers?.user as unknown as IUserToken
-        const receiverSocket = this.connectedUsers[client.id];
-
-        console.log(`Clients receiving messages: `, Object.keys(this.connectedUsers))
-        const userSender = await this.userService.findOne(user.sub)
-        console.log(`Sender :`, userSender)
-        console.log(`Message :`, message)
-        // console.log(`Client :`, client.handshake.)
-        if (receiverSocket) {
-            receiverSocket.emit('message', message);
-            await this.chatService.create({
-                userId: String(userSender._id),
-                receiverId: "",
-                message: message.message
-            })
-        } else {
-            console.log('Receiver is not online');
+        let user = client.handshake.headers?.user as string
+        if (!user) {
+            client.disconnect(true);
+            return;
         }
+        const userObject = JSON.parse(user) as User
+        this.logger.log(`Sending messages to ${client.id}| `)
+        client.emit('message', message);
+        await this.chatService.create({
+            userId: String(userObject?._id),
+            receiverId: message.receiverId,
+            message: message.message,
+        })
+    }
+
+    @SubscribeMessage(socketEvents.enterRoom)
+    @UseGuards(AuthSocketGuard)
+    async onEnterRoom(
+        @MessageBody() receiverUser: User,
+        @ConnectedSocket() client: Socket
+    ) {
+        this.logger.log('onEnterRoom')
+
+        let user = client.handshake.headers?.user as string
+        this.logger.log(user)
+        if (!user) {
+            client.disconnect(true);
+            return;
+        }
+        const userObject = JSON.parse(user) as User
+        const messages = await this.chatService.getAllMessagesByUserAndReceiver(userObject._id, receiverUser._id)
+        client.emit(socketEvents.getAllMessages, messages)
     }
 }

@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpCode, Inject, Post, Request, UseGuards,} from '@nestjs/common';
+import {Body, Controller, Get, HttpCode, Inject, Logger, Post, Request, UseGuards,} from '@nestjs/common';
 import {CreateUserDto} from "../user/dto/create-user.dto";
 import {UserService} from "../user/user.service";
 import {IGenericService} from "../shared/generic-service";
@@ -10,6 +10,8 @@ import {AuthGuard} from "./auth.guard";
 
 @Controller('auth')
 export class AuthController {
+    private readonly logger = new Logger()
+
     constructor(
         @Inject(UserService) private readonly userService: IGenericService<User>,
         @Inject(AuthService) private readonly authService: AuthService
@@ -25,7 +27,12 @@ export class AuthController {
     @Post('/login')
     @HttpCode(200)
     async login(@Body() loginUserDto: LoginAuthDto) {
+        try {
+
         return this.authService.signIn(loginUserDto.username, loginUserDto.password)
+        }catch (e){
+            this.logger.error(e)
+        }
     }
 
     @UseGuards(AuthGuard)
