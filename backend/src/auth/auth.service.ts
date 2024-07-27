@@ -38,24 +38,23 @@ export class AuthService {
 
 
     async wsAuth(token: string): Promise<User | null> {
-        if (!token)
-            throw new UnauthorizedException();
-        try {
+        if (!token) {
+            throw new UnauthorizedException()
+        }
             const result: IUserToken | null = await this.jwtService.verify(
                 token,
                 {
                     secret: jwtConstants.secret,
                 }
             );
-            if (!result)
-                throw new UnauthorizedException();
+            if (!result) {
+                this.logger.error('Token is invalid')
+                return null
+            }
             const user = await this.userService.findOne(result.sub, null, '-password')
             if (user) {
                 return user;
             }
             return null
-        } catch (e) {
-            this.logger.error(e)
-        }
     }
 }

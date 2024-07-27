@@ -1,14 +1,19 @@
 
 
+export enum RoomEnum{
+    principal='principal',
+    another='another_room',
+}
+
 export enum MessengerType {
     SENDER,
     RECEIVER,
 };
 export interface IMessage {
-    userId: string;
-    receiverId:string;
+    userId?: string;
+    receiverId:string|RoomEnum; //UserId or room constants
     message: string;
-    time: Date;
+    createdAt: Date;
     type?: MessengerType
 }
 

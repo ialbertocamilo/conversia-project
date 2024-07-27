@@ -1,17 +1,16 @@
 
-export enum MessengerType {
-    SENDER,
-    RECEIVER,
-};
+export const MessengerType={
+    RECEIVER:'receiver',
+    SENDER:'sender'
+
+}
 export interface IMessage {
     userId?: string;
     receiverId:string;
     message: string;
-    createdAt: Date;
-    type?: MessengerType
+    createdAt?: Date;
 }
 
-export interface IChatMessage{
-    senderMessage:IMessage[],
-    receiverMessage:IMessage[]
+export interface IChatMessage extends IMessage{
+    type?: string
 }

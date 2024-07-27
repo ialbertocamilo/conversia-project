@@ -11,4 +11,4 @@ socket.on('message', (data) => {
     console.log('Received message:', data);
 });
 
-socket.emit('my-event', {data: 'Hello from client'});
+socket.emit('message', {data: 'Hello from client'});

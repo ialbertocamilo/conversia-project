@@ -6,6 +6,8 @@ import NavBar from "@/components/nav/nav-bar";
 import {cn} from "@/lib/utils";
 import {AuthProvider} from "@/components/auth-provider";
 import RecoilContextProvider from "@/providers/recoil-context-provider";
+import {SocketProvider} from "@/providers/socket-context.provider";
+import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -19,21 +21,21 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
 
-    return (
-        <html lang="en" suppressHydrationWarning>
-        <body className={cn(
-            inter.className)}>
+    return (<html lang="en" suppressHydrationWarning>
+        <body className={cn(inter.className)}>
         <RecoilContextProvider>
             <AuthProvider>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <NavBar/>
-                    <div className="container  h-screen bg-background ">
-                        {children}
-                    </div>
+                    <SocketProvider>
+                        <NavBar/>
+                        <div className="container  h-screen bg-background ">
+
+                            {children}
+                        </div>
+                    </SocketProvider>
                 </ThemeProvider>
             </AuthProvider>
         </RecoilContextProvider>
         </body>
-        </html>
-    );
+        </html>);
 }

@@ -31,11 +31,13 @@ export default function LoginComponent() {
                             <div className="space-y-2">
                                 <Label htmlFor="username">Username</Label>
                                 <Input id="username" onChange={(e) => setUsername(e.target.value)}
+                                       value={username}
                                        placeholder="Enter your username"/>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <Input id="password" type="password" onChange={(e) => setPassword(e.target.value)}
+                                       value={password}
                                        placeholder="Enter your password"/>
                             </div>
                             <LoginButton data={{username, password}}/>

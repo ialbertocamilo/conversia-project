@@ -17,7 +17,7 @@ export class User {
     @Prop()
     password: string;
 
-    @Prop({default: Date.now})
+    @Prop({default: new Date()})
     createdAt?: string;
 }
 

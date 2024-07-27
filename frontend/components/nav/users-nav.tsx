@@ -6,7 +6,9 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {IOnlineUser, User} from "@/interfaces/online-users.interface";
 import {useRecoilState} from "recoil";
 import {userRoomAtom} from "@/atoms/user-room.atom";
-import {useSocket} from "@/hooks/useSocket";
+import {useSocket} from "@/providers/socket-context.provider";
+import {useEffect, useState} from "react";
+import {authUserAtom} from "@/atoms/auth-user.atom";
 
 
 function Item({name, message, select,}: {
@@ -21,7 +23,7 @@ function Item({name, message, select,}: {
     }
     return (
         <>
-            <div className="flex items-start items-center gap-4 m-2 cursor-pointer hover:animate-pulse hover:scale-105"
+            <div className="flex items-center gap-4 m-2 cursor-pointer hover:animate-pulse hover:scale-105"
                  onClick={selectItem}>
                 <Avatar className="w-8 h-8 border-green-500 border-2">
                     <AvatarImage src="/placeholder-user.jpg"/>
@@ -42,14 +44,25 @@ function Item({name, message, select,}: {
     )
 }
 
-export function UsersNav({items}: { items: IOnlineUser[] | undefined }) {
+export function UsersNav() {
 
     const [user, setUser] = useRecoilState(userRoomAtom)
 
-    const {emitEnterRoom} = useSocket()
+    const [items, setItems] = useState<IOnlineUser[]>()
+    const socket = useSocket()
+    const [authUser] = useRecoilState(authUserAtom)
     const selectUser = (user: User) => {
         setUser(user)
-        emitEnterRoom(user)
+        socket?.emitEnterRoom(user)
+    }
+    useEffect(() => {
+        setItems(socket?.onlineUsers.filter(value => value?.user?._id !== authUser._id))
+    }, [socket?.onlineUsers]);
+
+    const selectRoom = () => {
+        console.log("Select room")
+        setUser({name: 'Sala principal', username: 'principal', _id: 'principal'})
+        socket?.emitEnterRoom({name: 'Sala principal', username: 'principal', _id: 'principal'})
     }
     return (
         <div
@@ -75,8 +88,9 @@ export function UsersNav({items}: { items: IOnlineUser[] | undefined }) {
                     <div className=" w-full  relative pointer-events-auto my-1">
 
                         <Button size="sm"
-                                className=' bg-background w-full text-primary hover:bg-background hover:text-primary-foreground'>Sala
-                            principal</Button>
+                                onClick={selectRoom}
+                                className=' bg-background w-full text-primary hover:bg-background hover:text-primary-foreground'>
+                            Sala principal</Button>
                     </div>
                 </div>
                 <ul>

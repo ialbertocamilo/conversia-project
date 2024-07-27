@@ -7,28 +7,30 @@ import {useRecoilState} from "recoil";
 import {authUserAtom} from "@/atoms/auth-user.atom";
 import {useEffect} from "react";
 import {getMe} from "@/api/auth/get-me";
-import {useSocket} from "@/hooks/useSocket";
 import {useStorage} from "@/hooks/useStorage";
 import {STORAGE_VARIABLES} from "@/shared/constants";
 import {useRouter} from "next/navigation";
+import {SocketContextType, useSocket} from "@/providers/socket-context.provider";
 
 export default function NavBar() {
 
+    const socket = useSocket()
+    const router = useRouter()
     const [authUser, setAuthUser] = useRecoilState(authUserAtom)
-    const {emitClose} = useSocket()
     useEffect(() => {
         getMe().then(data => {
             setAuthUser(data)
         })
     }, []);
-    const router=useRouter()
 
-    const closeSession = () => {
+
+    async function closeSession() {
+        await socket?.emitClose()
         setAuthUser({})
         useStorage(STORAGE_VARIABLES.token).set(null)
-        emitClose()
         router.push('/')
     }
+
     return (
         <header className="fixed top-0 z-50 w-full bg-background h-25">
             <div className="container flex h-16 items-center justify-between ">
@@ -37,7 +39,7 @@ export default function NavBar() {
                 </Link>
                 <nav className="hidden items-center gap-6 md:flex">
                     <span
-                        className='text-sm font-medium hover:text-primary transition-colors'>{authUser.name?'Hello, '+authUser.name:''}</span>
+                        className='text-sm font-medium hover:text-primary transition-colors'>{authUser.name ? 'Hello, ' + authUser.name : ''}</span>
                     <Link href="#" className="text-sm font-medium hover:text-primary transition-colors"
                           prefetch={false}
                           onClick={closeSession}

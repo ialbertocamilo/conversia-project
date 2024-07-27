@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import {SALT} from './constants';
 import {IOnlineUser} from "../chat/interfaces/online-users.interface";
 import {User} from "../user/schema/user-schema";
+import {RoomEnum} from "../chat/interfaces/message.interface";
 
 export async function encrypt(value: string) {
     return await bcrypt.hash(value, SALT);
@@ -24,19 +25,41 @@ export function extractBearerToken(authorization: string): string | undefined {
 }
 
 
-export function removeOnlineUserFromArray(value: IOnlineUser, array: IOnlineUser[]): IOnlineUser[] {
-    return array?.filter(item => String(item.user?._id) !== String(value.user?._id));
-}
-export function removeSocketFromArray(value: IOnlineUser, array: IOnlineUser[]): IOnlineUser[] {
-    return array?.filter(item => String(item.user?._id) !== String(value.user?._id));
-}
-
-export function hideProperties<T>(obj: T, propertiesToHide: string[]) {
-  return Object.keys(obj)
-    .filter(key => !propertiesToHide.includes(key))
-    .reduce((acc, key) => ({ ...acc, [key]: obj[key] }), {} as T);
+export function removeUsersBySocketCode(
+  socketCodesToRemove: string[],
+  onlineUsers: IOnlineUser[],
+): IOnlineUser[] {
+  const codesToRemoveSet = new Set(socketCodesToRemove);
+  return onlineUsers?.filter(user => codesToRemoveSet.has(user.socket_code));
 }
 
-export function getUsersExceptMe(user:User,onlineUsers:IOnlineUser[]){
-    return onlineUsers.filter(item => String(item.user?._id) !== String(user._id))
+export function filterSocketUserInfo(userId:string,array:IOnlineUser[]){
+    return array.filter(value => value.user._id==userId)
+}
+export function isRoom(roomId:RoomEnum) {
+
+    switch (roomId){
+        case RoomEnum.another:
+        case RoomEnum.principal:
+            return true
+        default:
+            return false
+    }
+}
+
+export function extractSocketCodeFromKeys(list:string[]){
+
+    return  list.map((value:string) => value.split('_')[1])
+}
+
+export function getRoomNameFromKey(key:string){
+    return key.split('_')[0]
+}
+
+export function getRoomUsers(roomName:string,onlineUsers:IOnlineUser[]){
+    return onlineUsers.filter(value => value.user._id==roomName)
+}
+
+export function getRoomUsersBySocket(roomName:string,onlineUsers:IOnlineUser[]){
+    return onlineUsers.filter(value => value.socket_code==roomName)
 }

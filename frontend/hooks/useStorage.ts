@@ -29,5 +29,5 @@ export function useStorage<T>(storageKey: string) {
         localStorage.setItem(key, JSON.stringify(data));
     }
 
-    return {get, set};
+    return {get, set,removeItem};
 }

@@ -25,3 +25,10 @@ export const socketEvents={
     leaveRoom: 'leave_room',
     getAllMessages: 'get_all_messages'
 }
+
+
+export const messengerType={
+    RECEIVER:'receiver',
+    SENDER:'sender'
+
+}
