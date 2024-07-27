@@ -10,6 +10,7 @@ import {SetterOrUpdater, useRecoilState} from 'recoil';
 import {authUserAtom} from '@/atoms/auth-user.atom';
 import {chatMessagesAtom} from '@/atoms/chat-messages.atom';
 import {useRouter} from "next/navigation";
+import {userRoomAtom} from "@/atoms/user-room.atom";
 
 export interface SocketContextType {
     socket: Socket | null;
@@ -72,6 +73,13 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({children}) =>
         });
     };
 
+    const [roomUser, setRoomUser] = useRecoilState(userRoomAtom)
+    useEffect(() => {
+
+        console.log("Entering room")
+        console.log(roomUser)
+        emitEnterRoom(roomUser)
+    }, [roomUser]);
     const emitEnterRoom = (data: User) => {
         socket?.emit(socketEvents.enterRoom, data);
     };

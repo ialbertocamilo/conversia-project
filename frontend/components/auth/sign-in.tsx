@@ -31,7 +31,6 @@ export default function LoginComponent() {
                             <div className="space-y-2">
                                 <Label htmlFor="username">Username</Label>
                                 <Input id="username" onChange={(e) => setUsername(e.target.value)}
-                                       value={username}
                                        placeholder="Enter your username"/>
                             </div>
                             <div className="space-y-2">

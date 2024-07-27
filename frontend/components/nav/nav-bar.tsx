@@ -27,7 +27,7 @@ export default function NavBar() {
     async function closeSession() {
         await socket?.emitClose()
         setAuthUser({})
-        useStorage(STORAGE_VARIABLES.token).set(null)
+        useStorage(STORAGE_VARIABLES.token).removeItem()
         router.push('/')
     }
 
