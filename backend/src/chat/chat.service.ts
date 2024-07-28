@@ -1,28 +1,16 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { GenericService } from '../shared/generic-service';
 import { ChatMessage, ChatMessageDocument } from './schema/messages-schema';
 import { IGenericRepository } from '../shared/generic-mongo-repository.service';
 import { ChatMessageMongoRepository } from './chat-message-mongo.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisCache } from 'cache-manager-redis-yet';
-import {
-  messengerType,
-  redisConstants,
-  socketEvents,
-} from '../common/constants';
-import { IOnlineUser } from './interfaces/online-users.interface';
-import {
-  extractSocketCodeFromKeys,
-  filterSocketUserInfo,
-  removeUsersBySocketCode,
-} from '../common/utils';
+import { redisConstants, socketEvents } from '../common/constants';
+import { filterSocketUserInfo, removeUsersBySocketCode } from '../common/utils';
 import { User } from '../user/schema/user-schema';
-import {
-  IMessage,
-  MessengerType,
-  RoomEnum,
-} from './interfaces/message.interface';
+import { ERoom, IOnlineNode, IOnlineUser } from './interfaces/chat.interface';
 import { Socket } from 'socket.io';
+import { UserMongoRepository } from '../user/user-mongo.repository';
+import { GenericService } from '../shared/service/generic-service';
 
 @Injectable()
 export class ChatService extends GenericService<ChatMessage> {
@@ -32,100 +20,104 @@ export class ChatService extends GenericService<ChatMessage> {
     @Inject(ChatMessageMongoRepository)
     protected readonly repository: IGenericRepository<ChatMessageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: RedisCache,
+    @Inject(UserMongoRepository)
+    protected readonly userRepository: IGenericRepository<User>,
   ) {
     super(repository);
   }
 
-  async addOnlineUser(user: User, clientId: string): Promise<IOnlineUser[]> {
-    const onlineUser = { user: user, socket_code: clientId };
+  async addUserNode(onlineUser: IOnlineNode): Promise<IOnlineNode[]> {
     const users = (await this.cacheManager.store.get(
-      redisConstants.USER_LIST,
-    )) as Array<IOnlineUser>;
+      redisConstants.CONNECTED_NODES,
+    )) as Array<IOnlineNode>;
     const updatedUsers =
       users?.length > 0 ? [...users, onlineUser] : [onlineUser];
-    await this.cacheManager.store.set(redisConstants.USER_LIST, updatedUsers);
+    await this.cacheManager.store.set(
+      redisConstants.CONNECTED_NODES,
+      updatedUsers,
+    );
+
     return updatedUsers;
   }
 
-  async removeSocketFromOnlineList(socketCodes: string[]) {
+  async updateNodesBySocket(socketCode: string) {
     let onlineUsers = (await this.cacheManager.store.get(
-      redisConstants.USER_LIST,
-    )) as Array<IOnlineUser>;
-    if (socketCodes?.length == 0) {
-      await this.cacheManager.store.del(redisConstants.USER_LIST);
-      return [];
-    }
-    onlineUsers = removeUsersBySocketCode(socketCodes, onlineUsers);
-    await this.cacheManager.store.set(redisConstants.USER_LIST, onlineUsers);
+      redisConstants.CONNECTED_NODES,
+    )) as Array<IOnlineNode>;
+    onlineUsers = removeUsersBySocketCode(socketCode, onlineUsers);
+    await this.cacheManager.store.set(
+      redisConstants.CONNECTED_NODES,
+      onlineUsers,
+    );
     return onlineUsers;
   }
 
-  async getOnlineUsers() {
-    return await this.cacheManager.store.get(redisConstants.USER_LIST);
+  async updateOnlineUsers(userNodes: IOnlineNode[]) {
+    const uniqueUsers = userNodes
+      .filter(
+        (userWithSocket, index, self) =>
+          index ===
+          self.findIndex((u) => u.user._id === userWithSocket.user._id),
+      )
+      .map((userWithSocket) => userWithSocket.user);
+
+    await this.cacheManager.store.set(redisConstants.ONLINE_USERS, uniqueUsers);
+    return uniqueUsers;
   }
 
-  async getAllMessagesByUserAndReceiver(userId: string, receiverId: string) {
-    const messages = await this.repository.findAll({
+  async getConnectedNodes() {
+    return (await this.cacheManager.get(
+      redisConstants.CONNECTED_NODES,
+    )) as IOnlineNode[];
+  }
+
+  async getAllMessagesByUserAndReceiver(
+    user: Partial<User>,
+    receiver: Partial<IOnlineUser>,
+  ) {
+    if (receiver.roomType === ERoom.public) {
+      return await this.repository.findAll({
+        $or: [{ receiverId: receiver._id }],
+      });
+    }
+    return await this.repository.findAll({
       $or: [
-        { userId: userId, receiverId: receiverId },
-        { userId: receiverId, receiverId: userId },
+        { userId: user._id, receiverId: receiver._id },
+        { userId: receiver._id, receiverId: user._id },
       ],
-    });
-    console.log('message');
-    console.log(messages);
-    return messages.map((value) => {
-      if (value.userId === userId)
-        return { ...value.toJSON(), type: messengerType.SENDER };
-      else if (value.userId === receiverId)
-        return { ...value.toJSON(), type: messengerType.RECEIVER };
     });
   }
 
   async getInfoFromOnlineUsers(userId: string) {
     const onlineUsers = (await this.cacheManager.store.get(
-      redisConstants.USER_LIST,
-    )) as Array<IOnlineUser>;
+      redisConstants.CONNECTED_NODES,
+    )) as Array<IOnlineNode>;
     return filterSocketUserInfo(userId, onlineUsers);
   }
 
-  async messageToRoom(chatMessage: IMessage, connectedUsers: Socket[]) {
-    if (chatMessage.receiverId === RoomEnum.principal) {
-      console.log('Message to room');
-      const usersInRoom = await this.cacheManager.store.keys(
-        `${RoomEnum.principal}*`,
-      );
-      const result = extractSocketCodeFromKeys(usersInRoom);
-      result.forEach((value) => {
-        if (connectedUsers[value])
-          connectedUsers[value].emit(socketEvents.message, chatMessage);
-      });
+  async messageToUser(client: Socket, chatMessage: ChatMessage) {
+    if (chatMessage.roomType === ERoom.public) {
+      client.to(chatMessage.receiverId).emit(socketEvents.message, chatMessage);
     }
   }
 
-  async messageToUser(
-    chatMessage: IMessage,
-    connectedUsers: Socket[],
-    authUser: User,
-  ) {
-    const onlineUsers = await this.getInfoFromOnlineUsers(
-      chatMessage.receiverId,
-    );
-    onlineUsers.forEach((value) =>
-      connectedUsers[value.socket_code]?.emit(socketEvents.message, {
-        ...chatMessage,
-        type: MessengerType.RECEIVER,
-      }),
-    );
+  async enterRoom(room: string, clientSocket: Socket, user: Partial<User>) {
+    this.logger.log('Entering to room : ', room);
+    clientSocket.join(clientSocket.id);
+
+    const objs = await this.repository.findAll({ receiverId: room });
+    return objs.map((value) => {
+      return value.toJSON();
+    });
   }
 
-  async enterRoom(roomId: string, clientSocket: string, user: User) {
-    if (roomId === RoomEnum.principal) {
-      this.logger.log('Entering to room : ', roomId);
-      const key = roomId + '_' + clientSocket;
-      await this.cacheManager.store.set(key, user);
+  async leaveRoom(roomId: string, socketId: string) {
+    const key = `${roomId}_${socketId}`;
+    await this.cacheManager.store.del(key);
+  }
 
-      return await this.repository.findAll({ receiverId: roomId });
-    }
-    return null;
+  async addToConnectedUsers() {
+    await this.cacheManager.store.get(redisConstants.CONNECTED_NODES);
+    await this.cacheManager.store.set(redisConstants.CONNECTED_NODES, []);
   }
 }

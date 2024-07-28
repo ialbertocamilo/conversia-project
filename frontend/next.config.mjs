@@ -2,6 +2,7 @@
 const nextConfig = {
 
     reactStrictMode: false,
+    redirects: ['/login']
 };
 
 export default nextConfig;

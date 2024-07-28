@@ -7,10 +7,10 @@ import {useRecoilState} from "recoil";
 import {authUserAtom} from "@/atoms/auth-user.atom";
 import {useEffect} from "react";
 import {getMe} from "@/api/auth/get-me";
-import {useStorage} from "@/hooks/useStorage";
 import {STORAGE_VARIABLES} from "@/shared/constants";
 import {useRouter} from "next/navigation";
 import {SocketContextType, useSocket} from "@/providers/socket-context.provider";
+import {storage} from "@/lib/storage";
 
 export default function NavBar() {
 
@@ -26,8 +26,8 @@ export default function NavBar() {
 
     async function closeSession() {
         await socket?.emitClose()
-        setAuthUser({})
-        useStorage(STORAGE_VARIABLES.token).removeItem()
+        setAuthUser({_id: "", createdAt: "", name: undefined, username: undefined})
+        storage(STORAGE_VARIABLES.token).removeItem()
         router.push('/')
     }
 

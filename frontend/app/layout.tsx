@@ -8,6 +8,7 @@ import {AuthProvider} from "@/components/auth-provider";
 import RecoilContextProvider from "@/providers/recoil-context-provider";
 import {SocketProvider} from "@/providers/socket-context.provider";
 import React from "react";
+import {Toaster} from "react-hot-toast";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -21,21 +22,33 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
 
-    return (<html lang="en" suppressHydrationWarning>
+    return (
+      <html lang="en" suppressHydrationWarning>
         <body className={cn(inter.className)}>
-        <RecoilContextProvider>
+          <div>
+           <Toaster
+  position="top-right"
+  reverseOrder={false}
+/>
+          </div>
+          <RecoilContextProvider>
             <AuthProvider>
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <SocketProvider>
-                        <NavBar/>
-                        <div className="container  h-screen bg-background ">
-
-                            {children}
-                        </div>
-                    </SocketProvider>
-                </ThemeProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <SocketProvider>
+                  <NavBar />
+                  <div className="container  h-screen bg-background ">
+                    {children}
+                  </div>
+                </SocketProvider>
+              </ThemeProvider>
             </AuthProvider>
-        </RecoilContextProvider>
+          </RecoilContextProvider>
         </body>
-        </html>);
+      </html>
+    );
 }

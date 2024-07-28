@@ -1,35 +1,45 @@
-import {Module} from '@nestjs/common';
-import {AppController} from './app.controller';
-import {AppService} from './app.service';
-import {AuthModule} from './auth/auth.module';
-import {UserModule} from './user/user.module';
-import {ChatModule} from './chat/chat.module';
-import {MongooseModule} from '@nestjs/mongoose';
-import {SharedModule} from './shared/shared.module';
-import {ConfigModule, ConfigService} from "@nestjs/config";
-import {CACHE_MANAGER, CacheModule,CacheStore} from "@nestjs/cache-manager";
-import {redisStore} from 'cache-manager-redis-yet';
+import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CacheModule, CacheStore } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { ChatModule } from './chat/chat.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot(),
-        MongooseModule.forRoot('mongodb://localhost/db'), ConfigModule.forRoot(),
-        AuthModule,
-        UserModule,
-        ChatModule,
-        SharedModule,
-        CacheModule.registerAsync({
-            isGlobal: true,
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                store: (await redisStore({
-                    url: "redis://localhost:6379/",
-                })) as unknown as CacheStore,
-            })
-        })
-    ],
-    controllers: [AppController],
-    providers: [AppService],
+  imports: [
+    ConfigModule.forRoot(),
+    ThrottlerModule.forRoot([{ ttl: 10, limit: 2 }]),
+    MongooseModule.forRoot('mongodb://localhost/db'),
+    AuthModule,
+    UserModule,
+    ChatModule,
+    SharedModule,
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: (await redisStore({
+          url: configService.get<string>('REDIS_URL'),
+        })) as unknown as CacheStore,
+      }),
+    }),
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule {
-}
+export class AppModule {}

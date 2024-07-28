@@ -1,19 +1,26 @@
+import { ERoom } from "@/interfaces/messages";
+
 export class User {
+  _id?: string;
 
-    _id?: string;
+  name: string | undefined;
 
-    name: string | undefined;
+  username: string | undefined;
 
-    username: string | undefined;
+  createdAt?: string;
 
-    createdAt?: string;
-
-    constructor(params: unknown) {
-        Object.assign(this, params)
-    }
+  constructor(params: unknown) {
+    Object.assign(this, params);
+  }
 }
 
 export interface IOnlineUser {
-    user?: User;
-    socket_code: string
+  _id?: string;
+  name: string;
+  username: string;
+  roomType: ERoom;
+}
+
+export interface IRoom extends IOnlineUser {
+  roomType: ERoom;
 }

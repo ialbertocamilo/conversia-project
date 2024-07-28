@@ -11,12 +11,12 @@ interface StorageState<T> {
     error: string | null;
 }
 
-export function useStorage<T>(storageKey: string) {
+export function storage<T>(storageKey: string) {
 
     let key = storageKey
 
 
-    const removeItem = (key: string) => {
+    const removeItem = () => {
         localStorage.removeItem(key)
     };
     const get = () => {

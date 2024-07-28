@@ -1,17 +1,21 @@
+import { ERoom } from "@/interfaces/messages";
+
 export const STORAGE_VARIABLES = {
   token: "access_token",
 };
 
-export enum RoomEnum {
-  principal = "principal",
-}
-
 export const Rooms = {
-  principal: {
-    username: RoomEnum.principal,
+  public: {
+    username: "public-room",
     name: "Sala principal",
-    _id: RoomEnum.principal,
-    key: RoomEnum.principal,
+    _id: "public-room",
+    roomType: ERoom.public,
+  },
+  private: {
+    username: "private-room",
+    name: "Sala privada",
+    _id: "private-room",
+    roomType: ERoom.private,
   },
 };
 
@@ -21,4 +25,5 @@ export const socketEvents = {
   enterRoom: "enter_room",
   leaveRoom: "leave_room",
   getAllMessages: "get_all_messages",
+  joinRoom: "join_room",
 };

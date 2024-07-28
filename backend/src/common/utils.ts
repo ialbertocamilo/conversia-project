@@ -1,7 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { messengerType, SALT } from './constants';
-import { IOnlineUser } from '../chat/interfaces/online-users.interface';
-import { IMessage, RoomEnum } from '../chat/interfaces/message.interface';
+import { IMessage, IOnlineNode } from '../chat/interfaces/chat.interface';
 
 export async function encrypt(value: string) {
   return await bcrypt.hash(value, SALT);
@@ -23,53 +22,24 @@ export function extractBearerToken(authorization: string): string | undefined {
 }
 
 export function removeUsersBySocketCode(
-  socketCodesToRemove: string[],
-  onlineUsers: IOnlineUser[],
-): IOnlineUser[] {
-  const codesToRemoveSet = new Set(socketCodesToRemove);
-  return onlineUsers?.filter((user) => codesToRemoveSet.has(user.socket_code));
+  socketCodeToRemove: string,
+  onlineUsers: IOnlineNode[],
+): IOnlineNode[] {
+  return onlineUsers?.filter((user) => user.socketId !== socketCodeToRemove);
 }
 
-export function filterSocketUserInfo(userId: string, array: IOnlineUser[]) {
-  return array.filter((value) => value.user._id == userId);
-}
-
-export function isRoom(roomId: RoomEnum) {
-  switch (roomId) {
-    case RoomEnum.another:
-    case RoomEnum.principal:
-      return true;
-    default:
-      return false;
-  }
-}
-
-export function extractSocketCodeFromKeys(list: string[]) {
-  return list.map((value: string) => value.split('_')[1]);
-}
-
-export function getRoomNameFromKey(key: string) {
-  return key.split('_')[0];
-}
-
-export function getRoomUsers(roomName: string, onlineUsers: IOnlineUser[]) {
-  return onlineUsers.filter((value) => value.user._id == roomName);
-}
-
-export function getRoomUsersBySocket(
-  roomName: string,
-  onlineUsers: IOnlineUser[],
-) {
-  return onlineUsers.filter((value) => value.socket_code == roomName);
+export function filterSocketUserInfo(userId: string, array: IOnlineNode[]) {
+  return array?.filter((value) => value.user._id == userId);
 }
 
 export function filterUserMessagesByRoom(
   messages: IMessage[],
   authUserId: string,
 ) {
-  messages.map((value) => {
-    if (String(value.userId) === authUserId)
+  return messages?.map((value) => {
+    if (String(value.author) === authUserId) {
       return { ...value, type: messengerType.SENDER };
+    }
     return { ...value, type: messengerType.RECEIVER };
   });
 }
