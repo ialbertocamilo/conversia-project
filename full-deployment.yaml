@@ -6,7 +6,7 @@ metadata:
   name: app-config
 data:
   mongodb-uri: "mongodb://mongodb-service:27017/myapp"
-  redis-uri: "redis://localhost:6379/"
+  redis-uri: "redis://redis-service:6379/"
   cache-ttl: "10000"
   frontend-uri: "http://0.0.0.0:8000"
 
@@ -15,21 +15,20 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodejs-app
+  name: backend-app
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nodejs-app
+      app: backend-app
   template:
     metadata:
       labels:
-        app: nodejs-app
+        app: backend-app
     spec:
       containers:
-      - name: nodejs-app
-        image: your-docker-registry/nodejs-app:latest
-        imagePullPolicy: Never  # Para uso con Minikube
+      - name: backend-app
+        image: isvgxd/conversia-backend:latest
         ports:
         - containerPort: 3000
         env:
@@ -42,7 +41,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: app-config
-              key: redis-host
+              key: redis-uri
         - name: CACHE_TTL
           valueFrom:
             configMapKeyRef:
@@ -59,10 +58,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodejs-service
+  name: backend-service
 spec:
   selector:
-    app: nodejs-app
+    app: backend-app
   ports:
     - protocol: TCP
       port: 80
