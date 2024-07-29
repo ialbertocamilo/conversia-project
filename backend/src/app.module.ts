@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -48,4 +48,12 @@ import { SharedModule } from './shared/shared.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  private readonly logger = new Logger();
+
+  constructor() {
+    this.logger.log(`Env variables`);
+    this.logger.log(JSON.stringify(process.env.MONGODB_URI));
+    this.logger.log(JSON.stringify(process.env.REDIS_URI));
+  }
+}

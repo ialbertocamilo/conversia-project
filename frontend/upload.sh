@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-# Configuración
-DOCKER_USERNAME="isvgxd"
-DOCKER_PASSWORD="Donkeykong993."
-APP_NAME="conversia-backend"
+APP_NAME="conversia-frontend"
 VERSION="1.0.0"
 
 echo "Construyendo la imagen Docker..."

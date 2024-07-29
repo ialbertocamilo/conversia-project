@@ -2,7 +2,7 @@
   "name": "backend-app",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "Alberto Camilo Rodriguez Vizcarra",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -44,6 +44,7 @@
     "class-validator": "^0.14.1",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
+    "makeerror": "^1.0.12",
     "mongoose": "^8.5.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",

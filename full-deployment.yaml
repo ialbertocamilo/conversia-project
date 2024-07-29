@@ -9,6 +9,8 @@ data:
   redis-uri: "redis://redis-service:6379/"
   cache-ttl: "10000"
   frontend-uri: "http://0.0.0.0:8000"
+  backend-uri: "http://backend-service:8000"
+
 
 ---
 # App Deployment
@@ -30,14 +32,14 @@ spec:
       - name: backend-app
         image: isvgxd/conversia-backend:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 8000
         env:
         - name: MONGODB_URI
           valueFrom:
             configMapKeyRef:
               name: app-config
               key: mongodb-uri
-        - name: REDIS_HOST
+        - name: REDIS_URI
           valueFrom:
             configMapKeyRef:
               name: app-config
@@ -64,11 +66,60 @@ spec:
     app: backend-app
   ports:
     - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer
+
+---
+##Next deployment
+
+---
+# front Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: front-app
+  template:
+    metadata:
+      labels:
+        app: front-app
+    spec:
+      containers:
+      - name: front-app
+        image: isvgxd/conversia-frontend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NEXT_PUBLIC_SOCKET_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: backend-uri
+
+---
+# web Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend-app
+  ports:
+    - protocol: TCP
       port: 80
       targetPort: 3000
   type: LoadBalancer
 
 ---
+
+
+
 # MongoDB Deployment
 apiVersion: apps/v1
 kind: Deployment
