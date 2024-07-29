@@ -10,15 +10,10 @@ export const metadata: Metadata = {
   description: "Codigo creado por Alberto Camilo Rodriguez Vizcarra",
 };
 
-export default function RootLayout({
+export default function LoginLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn(inter.className)}>{children}
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }

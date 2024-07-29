@@ -91,11 +91,6 @@ export default function ChatPage() {
       socket.setMessage("");
     }
   };
-
-  useEffect(() => {
-    toast("Hello World");
-  }, []);
-
   return (
     <div className="max-w-8xl mx-auto">
       <UsersNav />

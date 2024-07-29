@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -15,6 +16,8 @@ import { IGenericService } from '../shared/service/generic-service';
 
 @Injectable()
 export class AuthSocketGuard implements CanActivate {
+  private readonly logger = new Logger();
+
   constructor(
     private jwtService: JwtService,
     @Inject(UserService) private readonly userService: IGenericService<User>,
@@ -37,9 +40,9 @@ export class AuthSocketGuard implements CanActivate {
         '-password',
       );
       if (user) request.handshake.headers['user'] = JSON.stringify(user);
-    } catch {
+    } catch (e) {
       console.log('Exception');
-      throw new UnauthorizedException();
+      this.logger.error(e);
     }
     return true;
   }
