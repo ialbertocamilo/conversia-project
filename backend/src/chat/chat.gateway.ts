@@ -25,6 +25,7 @@ import { RedisCache } from 'cache-manager-redis-yet';
 import { socketEvents } from '../common/constants';
 import { IMessage, IOnlineUser } from './interfaces/chat.interface';
 import { IGenericService } from '../shared/service/generic-service';
+import { RateLimiterGuard } from '../shared/rate-limiter.guard';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -66,9 +67,12 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
 
   async handleDisconnect(client: Socket) {
     try {
-      const onlineUsers = await this.chatService.updateNodesBySocket(client.id);
+      const arrayNodes = Array.from(this.server.sockets.sockets.keys());
+      const onlineUsers =
+        await this.chatService.updateNodesBySockets(arrayNodes);
       this.logger.log(`Client : \x1b[31m ${client.id} \x1b[0m disconnected.`);
       this.logger.log(`Clients: `, onlineUsers);
+      console.log();
       this.server.emit(socketEvents.usersList, onlineUsers);
       client.disconnect();
     } catch (e) {
@@ -78,6 +82,7 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
 
   @SubscribeMessage(socketEvents.message)
   @UseGuards(AuthSocketGuard)
+  @UseGuards(RateLimiterGuard)
   async onMessage(
     @MessageBody() message: IMessage,
     @ConnectedSocket() client: Socket,
@@ -92,7 +97,6 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
         roomType: message.receiver?.roomType,
         message: message.message,
       });
-      console.log(`Message `, msg);
       await this.chatService.messageToUser(client, msg);
       const messages = await this.chatService.getAllMessagesByUserAndReceiver(
         authUser,

@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Inject,
   Logger,
   Post,
@@ -18,6 +20,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { RateLimiterGuard } from '../shared/rate-limiter.guard';
 import { IGenericService } from '../shared/service/generic-service';
+import { Document } from 'mongoose';
 
 @Controller('auth')
 @UseGuards(RateLimiterGuard)
@@ -31,10 +34,18 @@ export class AuthController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create({
+    const user = await this.userService.findOne(null, {
+      username: createUserDto.username,
+    });
+    if (user) {
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    }
+
+    const createdUser = (await this.userService.create({
       ...createUserDto,
       password: await encrypt(createUserDto.password),
-    });
+    })) as unknown as Document;
+    return { ...createdUser.toJSON(), password: undefined };
   }
 
   @Post('/login')

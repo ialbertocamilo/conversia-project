@@ -9,10 +9,8 @@ export async function getMe(){
         if (response.status === 200) {
             return response.data as User;
         }
-        throw new Error('Failed to save register');
 
     } catch (error) {
         console.error('Error :', error);
-        throw error;
     }
 }

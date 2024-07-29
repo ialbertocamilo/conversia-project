@@ -5,7 +5,11 @@ import { ChatMessageMongoRepository } from './chat-message-mongo.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisCache } from 'cache-manager-redis-yet';
 import { redisConstants, socketEvents } from '../common/constants';
-import { filterSocketUserInfo, removeUsersBySocketCode } from '../common/utils';
+import {
+  filterSocketUserInfo,
+  removeNodesBySocketCode,
+  updateNodesBySocketCodes,
+} from '../common/utils';
 import { User } from '../user/schema/user-schema';
 import { ERoom, IOnlineNode, IOnlineUser } from './interfaces/chat.interface';
 import { Socket } from 'socket.io';
@@ -41,15 +45,26 @@ export class ChatService extends GenericService<ChatMessage> {
   }
 
   async updateNodesBySocket(socketCode: string) {
-    let onlineUsers = (await this.cacheManager.store.get(
+    let connectedNodes = (await this.cacheManager.store.get(
       redisConstants.CONNECTED_NODES,
     )) as Array<IOnlineNode>;
-    onlineUsers = removeUsersBySocketCode(socketCode, onlineUsers);
+    connectedNodes = removeNodesBySocketCode(socketCode, connectedNodes);
     await this.cacheManager.store.set(
       redisConstants.CONNECTED_NODES,
-      onlineUsers,
+      connectedNodes,
     );
-    return onlineUsers;
+    return connectedNodes;
+  }
+  async updateNodesBySockets(arraySocketCodes: string[]) {
+    let connectedNodes = (await this.cacheManager.store.get(
+      redisConstants.CONNECTED_NODES,
+    )) as Array<IOnlineNode>;
+    connectedNodes = updateNodesBySocketCodes(arraySocketCodes, connectedNodes);
+    await this.cacheManager.store.set(
+      redisConstants.CONNECTED_NODES,
+      connectedNodes,
+    );
+    return connectedNodes;
   }
 
   async updateOnlineUsers(userNodes: IOnlineNode[]) {
@@ -112,8 +127,7 @@ export class ChatService extends GenericService<ChatMessage> {
   }
 
   async leaveRoom(roomId: string, socketId: string) {
-    const key = `${roomId}_${socketId}`;
-    await this.cacheManager.store.del(key);
+    const connectedNodes = redisConstants.CONNECTED_NODES;
   }
 
   async addToConnectedUsers() {

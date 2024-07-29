@@ -17,7 +17,13 @@ import { SharedModule } from './shared/shared.module';
   imports: [
     ConfigModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 10, limit: 2 }]),
-    MongooseModule.forRoot('mongodb://localhost/db'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+    }),
     AuthModule,
     UserModule,
     ChatModule,
@@ -28,7 +34,7 @@ import { SharedModule } from './shared/shared.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         store: (await redisStore({
-          url: configService.get<string>('REDIS_URL'),
+          url: configService.get<string>('REDIS_URI'),
         })) as unknown as CacheStore,
       }),
     }),

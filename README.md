@@ -3,8 +3,6 @@
 
 ```
 ├── src
-│   ├── app.module.ts
-│   ├── app.service.ts
 │   ├── auth
 │   │   ├── auth.controller.ts
 │   │   ├── auth.service.ts
@@ -13,10 +11,11 @@
 │   │   ├── chat.controller.ts
 │   │   ├── chat.service.ts
 │   │   └── chat.module.ts
-│   ├── users
-│   │   ├── users.controller.ts
-│   │   ├── users.service.ts
-│   │   └── users.module.ts
+│   │   └── chat.gateway.ts
+│   ├── user
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   └── user.module.ts
 │   ├── main.ts
 │   ├── shared
 │   │   ├── redis.service.ts
@@ -24,6 +23,9 @@
 │   │   └── shared.module.ts
 │   ├── app.controller.ts
 │   └── app.gateway.ts
+│   └── app.service.ts
+│   └── app.module.ts
+│   └── main.ts
 ├── k8s
 │   ├── deployment.yaml
 │   ├── service.yaml

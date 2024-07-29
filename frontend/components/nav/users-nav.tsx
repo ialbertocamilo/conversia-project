@@ -27,7 +27,7 @@ function Item({
     <>
       <div
         className="flex items-center gap-4 m-2 cursor-pointer hover:animate-pulse hover:scale-105"
-        onClick={selectItem}
+
       >
         <Avatar className="w-8 h-8 border-green-500 border-2">
           <AvatarImage src="/placeholder-user.jpg" />

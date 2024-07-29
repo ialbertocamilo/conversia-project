@@ -1,20 +1,18 @@
-import {api} from "@/lib/api";
+import { api } from "@/lib/api";
+import {type} from "node:os";
 
 export interface IRegister {
-    name: string,
-    username: string,
-    password: string
+  name: string;
+  username: string;
+  password: string;
 }
 
 export async function register(data: IRegister) {
-    try {
-        const response = await api().post('/auth', data)
-        if (response.status === 201) {
-            return response.data;
-        }
-        return
-    } catch (error) {
-        console.error('Error :', error);
-        throw error;
-    }
+  try {
+    const result = await api().post("/auth", data);
+    return { statusCode: result.status, result: result.data };
+  } catch (error: any) {
+    console.log("Error :", error.response);
+    return { statusCode: error?.response?.status, result: error?.response?.data };
+  }
 }

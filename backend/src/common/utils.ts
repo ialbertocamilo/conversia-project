@@ -21,11 +21,18 @@ export function extractBearerToken(authorization: string): string | undefined {
   return parts[1];
 }
 
-export function removeUsersBySocketCode(
+export function removeNodesBySocketCode(
   socketCodeToRemove: string,
   onlineUsers: IOnlineNode[],
 ): IOnlineNode[] {
   return onlineUsers?.filter((user) => user.socketId !== socketCodeToRemove);
+}
+export function updateNodesBySocketCodes(
+  socketCodeToRemove: string[],
+  onlineUsers: IOnlineNode[],
+): IOnlineNode[] {
+  const set = new Set(socketCodeToRemove);
+  return onlineUsers?.filter((user) => set.has(user.socketId));
 }
 
 export function filterSocketUserInfo(userId: string, array: IOnlineNode[]) {

@@ -15,15 +15,14 @@ export function api() {
   });
   instance.interceptors.response.use(
     (response) => {
-      console.log(response.data);
       return response;
     },
     (error) => {
       if (error?.response?.data?.statusCode === 401)
         toast.error("Acceso no autorizado");
       if (error?.response?.data?.statusCode === 429)
-        toast.error("Demasiados solicitudes");
-      return error;
+        toast.error("Demasiadas solicitudes");
+      return Promise.reject(error);
     },
   );
   return instance;

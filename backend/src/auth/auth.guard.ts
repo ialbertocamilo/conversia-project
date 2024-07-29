@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +15,8 @@ import { IGenericService } from '../shared/service/generic-service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  private readonly logger = new Logger();
+
   constructor(
     private jwtService: JwtService,
     @Inject(UserService) private readonly userService: IGenericService<User>,
@@ -37,7 +40,7 @@ export class AuthGuard implements CanActivate {
       if (!user) throw new UnauthorizedException();
       request['user'] = user;
     } catch {
-      console.log('Exception');
+      this.logger.error('AuthGuard exception');
     }
     return true;
   }

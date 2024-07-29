@@ -82,7 +82,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const emitMessage = (message: IMessage) => {
-    socket?.emit("message", message);
+    if (message.message) socket?.emit("message", message);
   };
 
   const pushMessage = (message: IFromServerMessage) => {

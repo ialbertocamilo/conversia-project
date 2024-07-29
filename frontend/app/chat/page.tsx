@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useRecoilState } from "recoil";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +12,6 @@ import { authUserAtom } from "@/atoms/auth-user.atom";
 import { useSocket } from "@/providers/socket-context.provider";
 import { SendIcon } from "lucide-react";
 import { User } from "@/interfaces/online-users.interface";
-import toast from "react-hot-toast";
 
 const SenderMessage = ({ data }: { data: IFromServerMessage }) => (
   <div className="flex gap-3 justify-end">
@@ -80,8 +79,14 @@ export default function ChatPage() {
 
   const messageContainer = useRef<HTMLDivElement | null>(null);
 
+  const sendEnter = (data: { code: string }) => {
+    if (data.code === "Enter") {
+      sendMessage();
+      return;
+    }
+  };
   const sendMessage = () => {
-    if (socket?.message) {
+    if (socket?.message.trim().length) {
       socket.emitMessage({
         author: authUser,
         receiver: roomUser,
@@ -127,8 +132,9 @@ export default function ChatPage() {
           <div className="relative">
             <Textarea
               placeholder="Type your message..."
-              className="min-h-[48px] rounded-2xl resize-none p-4 pr-16 border border-neutral-400 shadow-sm"
+              className="min-h-[48px] rounded-2xl resize-none p-4 pr-16 border border-neutral-400 shadow-sm overflow-y-hidden"
               value={socket?.message || ""}
+              onKeyUp={sendEnter}
               onChange={(e) => socket?.setMessage(e.target.value)}
             />
             <Button

@@ -4,6 +4,7 @@ import { User } from './schema/user-schema';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { IGenericService } from '../shared/service/generic-service';
+import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('user')
 export class UserController {
@@ -18,6 +19,8 @@ export class UserController {
 
   @Get()
   @UseGuards(AuthGuard)
+  @CacheKey('getAllUsers')
+  @CacheTTL(120)
   getAll() {
     return this.userService.findAll();
   }
