@@ -43,7 +43,7 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Install kubectl
-      uses: actions-hub/kubectl@v1
+      uses: actions-hub/kubectl@master
 
     - name: Update kubeconfig
       run: |
