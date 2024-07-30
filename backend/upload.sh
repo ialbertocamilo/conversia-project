@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-# Configuración
-DOCKER_USERNAME="isvgxd"
-DOCKER_PASSWORD="Donkeykong993."
 APP_NAME="conversia-backend"
-VERSION="1.0.0"
+VERSION="latest"
 
 echo "Construyendo la imagen Docker..."
 docker build -t $APP_NAME:$VERSION . --no-cache

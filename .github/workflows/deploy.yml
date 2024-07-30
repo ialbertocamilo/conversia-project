@@ -24,8 +24,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}" ./backend/upload.sh
-        DOCKER_PASSWORD="${{secrets.DOCKER_PASSWORD}}" ./frontend/upload.sh
+        DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}" DOCKER_PASSWORD="${{secrets.DOCKER_PASSWORD}}" ./backend/upload.sh
+        DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}" DOCKER_PASSWORD="${{secrets.DOCKER_PASSWORD}}" ./frontend/upload.sh
 
   deploy:
     runs-on: ubuntu-latest
