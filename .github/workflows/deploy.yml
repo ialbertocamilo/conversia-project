@@ -43,20 +43,14 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Install kubectl
-      uses: actions-hub/kubectl@master
-
-    - name: Create kubeconfig file
-      run: |
-        echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
-        export KUBECONFIG=kubeconfig
+    - name: Update kube config
+      run: aws eks get-token --cluster-name conv-app | kubectl apply -f full-deployment.yaml
 
     - name: Set up kubectl
-      uses: actions-hub/kubectl@master
+      uses: azure/setup-kubectl@v1
       with:
-        kubeconfig: kubeconfig
-        kubehost: ${{ secrets.KUBE_HOST }}
+        version: v1.18.0
 
-    - name: Deploy to EKS
+    - name: Update Kubernetes deployment
       run: |
         kubectl apply -f full-deployment.yaml
