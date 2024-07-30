@@ -46,9 +46,16 @@ jobs:
     - name: Install kubectl
       uses: actions-hub/kubectl@master
 
-    - name: Update kubeconfig
+    - name: Create kubeconfig file
       run: |
-        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+        echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
+        export KUBECONFIG=kubeconfig
+
+    - name: Set up kubectl
+      uses: actions-hub/kubectl@master
+      with:
+        kubeconfig: kubeconfig
+        kubehost: ${{ secrets.KUBE_HOST }}
 
     - name: Deploy to EKS
       run: |
