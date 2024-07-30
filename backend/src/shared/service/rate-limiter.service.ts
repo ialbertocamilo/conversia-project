@@ -12,7 +12,6 @@ export class RateLimiterService {
   async isAllowed(ip: string): Promise<boolean> {
     const requests = await this.cacheManager.get<number>(ip);
 
-    console.log(Number(process.env.CACHE_TTL));
     if (!requests) {
       await this.cacheManager.set(ip, 1, Number(process.env.CACHE_TTL));
       return true;

@@ -26,61 +26,63 @@
 │   └── app.service.ts
 │   └── app.module.ts
 │   └── main.ts
-├── k8s
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   └── ingress.yaml
 ├── docker-compose.yml
+├── full-deployment.yml
 └── .env
 
 ```
 
-## Getting Started
+## Inicio
 
-### Prerequisites
+### Prerrequisitos
 
 - Node.js and npm
 - Docker
-- Kubernetes (minikube or similar)
+- Kubernetes (minikube o similar)
 
-### Installation
+### Instalación
 
-1. Clone the repository:
+1. Clona el repositorio:
      
-
-git clone https://github.com/your-username/conversia-chat-app.git
    ```
+   git clone https://github.com/ialbertocamilo/conversia-project
+    ```
 
-2. Navigate to the project directory:
+2. Ir a carpeta *backend/*:
    ```bash
-   cd conversia-chat-app
+   yarn 
    ```
 
-3. Install dependencies:
+3. Ir a carpeta *frontend/*:
    ```bash
-   npm install
+   yarn 
    ```
 
-## Running Locally
+## Localmente
 
-1. Start MongoDB and Redis:
+1. Iniciar MongoDB y Redis:
    ```bash
    docker-compose up -d
    ```
 
-2. Run the application:
+2. Iniciar frontend:
+     ```bash
+   yarn dev
+   ```
+3. Iniciar backend:
    ```bash
-   npm run start:dev
+   yarn start:dev
    ```
 
-## Deployment
+## Despliegue
 
-1. Build the Docker image:
+1. Es necesario agregar ```DOCKER_USERNAME y DOCKER_PASSWORD``` a las variables de entorno
+2. Construir y subir imagen:
    ```bash
-   docker build -t conversia-chat-app .
+   ./backend/update.sh
+   ./frontend/update.sh
    ```
 
-2. Deploy to Kubernetes:
+2. Desplegar kubernetes:
    ```bash
-   kubectl apply -f k8s/deployment.yaml
-   
+   kubectl apply -f full-deployment.yaml

@@ -15,8 +15,13 @@ import { authUserAtom } from "@/atoms/auth-user.atom";
 import { chatMessagesAtom } from "@/atoms/chat-messages.atom";
 import { useRouter } from "next/navigation";
 import { userRoomAtom } from "@/atoms/user-room.atom";
-import { socketEvents, STORAGE_VARIABLES } from "@/shared/constants";
+import {
+  eventErrors,
+  socketEvents,
+  STORAGE_VARIABLES,
+} from "@/shared/constants";
 import { storage } from "@/lib/storage";
+import toast from "react-hot-toast";
 
 export interface SocketContextType {
   socket: Socket | null;
@@ -77,6 +82,17 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({
     );
     newSocket.on(socketEvents.message, (data: IFromServerMessage) =>
       pushMessage(data),
+    );
+    newSocket.on(
+      "notify_error",
+      async (data: { message: string; name: string }) => {
+        if (data?.name === eventErrors.tokenExpiredError) {
+          toast.error("Token expirado, inicia sesión de nuevo");
+        } else {
+          toast.error(data?.message);
+        }
+          await emitClose();
+      },
     );
     newSocket.on("disconnect", () => console.log("Desconectado de websocket"));
   };

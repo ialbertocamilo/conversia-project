@@ -22,9 +22,15 @@ export const socketEvents = {
   joinRoom: 'join_room',
   leaveRoom: 'leave_room',
   getAllMessages: 'get_all_messages',
+  notifyError: 'notify_error',
+  notifySuccess: 'notify_success',
 };
 
 export const messengerType = {
   RECEIVER: 'receiver',
   SENDER: 'sender',
+};
+
+export const eventErrors = {
+  tokenExpiredError: 'TokenExpiredError',
 };

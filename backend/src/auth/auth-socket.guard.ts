@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { jwtConstants } from '../common/constants';
+import { jwtConstants, socketEvents } from '../common/constants';
 import { Socket } from 'socket.io';
 import { UserService } from '../user/user.service';
 import { User } from '../user/schema/user-schema';
@@ -40,11 +40,12 @@ export class AuthSocketGuard implements CanActivate {
         '-password',
       );
       if (user) request.handshake.headers['user'] = JSON.stringify(user);
+      return true;
     } catch (e) {
-      console.log('Exception');
+      request.emit(socketEvents.notifyError, e);
       this.logger.error(e);
+      return false;
     }
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

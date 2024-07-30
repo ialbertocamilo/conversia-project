@@ -49,6 +49,7 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
     }
   }
 
+  @UseGuards(AuthSocketGuard)
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.headers.authorization;
@@ -72,7 +73,6 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
         await this.chatService.updateNodesBySockets(arrayNodes);
       this.logger.log(`Client : \x1b[31m ${client.id} \x1b[0m disconnected.`);
       this.logger.log(`Clients: `, onlineUsers);
-      console.log();
       this.server.emit(socketEvents.usersList, onlineUsers);
       client.disconnect();
     } catch (e) {

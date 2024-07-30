@@ -27,3 +27,7 @@ export const socketEvents = {
   getAllMessages: "get_all_messages",
   joinRoom: "join_room",
 };
+
+export const eventErrors = {
+  tokenExpiredError:'TokenExpiredError'
+};

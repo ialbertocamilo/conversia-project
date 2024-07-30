@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRecoilState } from "recoil";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +46,7 @@ const ReceiverMessage = ({
     </Avatar>
     <div className="bg-muted rounded-lg p-3 max-w-[75%]">
       <p className="text-primary font-bold text-xs">{data.metadata?.name}:</p>
-      <p className="text-sm font-mono">{data.message}</p>
+      <p className="text-sm">{data.message}</p>
       <p>
         <span className="text-muted-foreground text-xs/[13px]">
           • {new Date(data.createdAt as Date).toLocaleTimeString()}
@@ -99,7 +99,7 @@ export default function ChatPage() {
   return (
     <div className="max-w-8xl mx-auto">
       <UsersNav />
-      <div className="lg:pl-[19.5rem] mt-16 min-h-full">
+      <div ref={messageContainer} className="lg:pl-[19.5rem] mt-16 min-h-full">
         <div className="sticky top-0 p-4 border-b bg-background z-50 h-16">
           <div className="flex items-center gap-4">
             <Avatar className="w-10 h-10">
@@ -114,8 +114,8 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
-        <div className="flex-1 p-4  min-h-screen">
-          <div ref={messageContainer} className="grid gap-2 pl-8 ">
+        <div  className="flex-1 p-4 min-h-screen">
+          <div className="grid gap-2 pl-8 ">
             {messages?.map((value: IFromServerMessage, index: React.Key) => (
               <ChatMessage
                 key={index}

@@ -39,10 +39,11 @@ export class AuthGuard implements CanActivate {
       );
       if (!user) throw new UnauthorizedException();
       request['user'] = user;
+      return true;
     } catch {
       this.logger.error('AuthGuard exception');
+      return false;
     }
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

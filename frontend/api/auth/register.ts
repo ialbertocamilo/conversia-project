@@ -12,7 +12,6 @@ export async function register(data: IRegister) {
     const result = await api().post("/auth", data);
     return { statusCode: result.status, result: result.data };
   } catch (error: any) {
-    console.log("Error :", error.response);
     return { statusCode: error?.response?.status, result: error?.response?.data };
   }
 }

@@ -10,13 +10,11 @@ export interface ILogIn {
 export async function logIn(data: ILogIn) {
     try {
         const response = await api().post('/auth/login', data)
-        console.log("response ",response)
         if (response.status === 200) {
             return response.data;
         }
 
     } catch (error) {
         console.error('Error :', error);
-        toast.error("Autenticación fallida.")
     }
 }
